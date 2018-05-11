@@ -10,7 +10,7 @@ block content
       if (author.date_of_birth || author.date_of_death)
         |  (#{author.birth_date} - #{author.death_date})
       else
-        |  No date available
+        span.text-danger  No date available
 
   else
     li There are no authors.
