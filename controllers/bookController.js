@@ -179,14 +179,29 @@ exports.book_delete_post = function(req, res) {
 // Display book update form on GET.
 exports.book_update_get = (req, res) => {
     sanitizeParam(req.params.id);
-    Book.findById(req.params.id).
-    populate('genre').
-    exec((err, book_update) => {
-      if(err) {console.log('Database error!')};
-      res.render('book_update_get', {book: book_update});
-    });
+    Promise.all([
+      Book.findById(req.params.id).
+      populate('genre').
+      populate('author').
+      exec(),
+      Genre.find().exec()
+    ]).
+    then((result) => {
+      res.render('book_update_get', {book: result[0], genres: result[1]});
+    }).
+    catch((err) => {console.log(err); next(err);});
   };
 
+  // exports.book_update_get = (req, res) => {
+  //     sanitizeParam(req.params.id);
+  //     Book.findById(req.params.id).
+  //     populate('genre').
+  //     populate('author').
+  //     exec((err, book_update) => {
+  //       if(err) {console.log('Database error!')};
+  //       res.render('book_update_get', {book: book_update});
+  //     });
+  //   };
 
 // Handle book update on POST.
 exports.book_update_post = function(req, res) {
