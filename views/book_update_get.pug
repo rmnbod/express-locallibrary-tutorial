@@ -1,0 +1,27 @@
+extends layout
+block content
+  h1 Update book
+  h2 #{book.title}
+	
+  #updatebook.container
+  h2 Update book
+  form
+    .form-group
+      label(for='title') Title:
+      input#title.form-control(type='text', name='title' value = book.title)
+    .form-group
+      label(for='summary') Summary:
+      textarea#summary.form-control(rows='5') !{book.summary}
+    .form-group
+      label(for='isbn') ISBN:
+      input#isbn.form-control(type='text', name='isbn', value = book.isbn)
+    
+    each genre in book.genre
+     input(type='checkbox', name='optradio')
+     | !{genre.name} 
+    else 
+     | no genres
+			
+    //button.btn.btn-default(type='submit') Submit
+
+  

@@ -3,3 +3,22 @@
     padding: 0;
     list-style: none;
 }
+
+li {
+  margin-top: 10px;
+}
+
+a.updatebook{
+    border-radius: 5px;
+    background-color: #00ace6;
+    color: white;
+    text-transform: uppercase;
+    padding: 8px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#updatebook{
+  padding-right: 50px;
+}

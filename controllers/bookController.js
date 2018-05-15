@@ -3,7 +3,7 @@ var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
 const { body,validationResult } = require('express-validator/check');
-const { sanitizeBody } = require('express-validator/filter');
+const { sanitizeBody, sanitizeParam } = require('express-validator/filter');
 
 var async = require('async');
 
@@ -66,6 +66,7 @@ exports.book_detail = function(req, res, next) {
             err.status = 404;
             return next(err);
         }
+        console.log(typeof (results.book.genre.name));
         // Successful, so render.
         res.render('book_detail', { title: 'Title',
           book:  results.book, book_instances: results.book_instance } );
@@ -174,10 +175,18 @@ exports.book_delete_post = function(req, res) {
     res.send('NOT IMPLEMENTED: Book delete POST');
 };
 
+
 // Display book update form on GET.
-exports.book_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update GET');
-};
+exports.book_update_get = (req, res) => {
+    sanitizeParam(req.params.id);
+    Book.findById(req.params.id).
+    populate('genre').
+    exec((err, book_update) => {
+      if(err) {console.log('Database error!')};
+      res.render('book_update_get', {book: book_update});
+    });
+  };
+
 
 // Handle book update on POST.
 exports.book_update_post = function(req, res) {
