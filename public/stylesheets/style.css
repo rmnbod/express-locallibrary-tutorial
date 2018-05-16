@@ -5,7 +5,7 @@
 }
 
 li {
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 a.updatebook{
@@ -21,4 +21,12 @@ a.updatebook{
 
 #updatebook{
   padding-right: 50px;
+}
+
+input[type="checkbox"]{
+  margin-left: 5px;
+}
+
+#book_upd_submit{
+  margin-top: 20px;
 }

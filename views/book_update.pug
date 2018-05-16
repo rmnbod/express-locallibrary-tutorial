@@ -1,0 +1,32 @@
+extends layout
+block content
+
+  h1 Update book
+  h2 #{book.title}
+  h4 #{book.author.first_name + ' ' + book.author.family_name}
+
+  #updatebook.container
+  form#book_upd_form(action='' method='post')
+    br
+    label(for='title') Title:
+    input#title.form-control(type='text', name='title' value = book.title)
+    br
+    label(for='summary') Summary:
+    textarea#summary.form-control(rows='5' name='summary') !{book.summary}
+    br
+    label(for='isbn') ISBN:
+    input#isbn.form-control(type='text', name='isbn', value = book.isbn)
+    br
+    each genre in genres
+      if genre.checked == true
+        input(type='checkbox', name='genre' value=genre.id checked)
+        | !{genre.name}
+      else
+        input(type='checkbox', name='genre' value=genre.id)
+        | !{genre.name}
+    else
+      | no genres
+    br
+    button.btn.btn-default#book_upd_submit(type="submit" method="post" disabled) Submit
+  
+  script(src='/javascripts/book_update.js')

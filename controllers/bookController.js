@@ -2,7 +2,7 @@ var Book = require('../models/book');
 var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
-const { body,validationResult } = require('express-validator/check');
+const { check, body, validationResult } = require('express-validator/check');
 const { sanitizeBody, sanitizeParam } = require('express-validator/filter');
 
 var async = require('async');
@@ -66,7 +66,6 @@ exports.book_detail = function(req, res, next) {
             err.status = 404;
             return next(err);
         }
-        console.log(typeof (results.book.genre.name));
         // Successful, so render.
         res.render('book_detail', { title: 'Title',
           book:  results.book, book_instances: results.book_instance } );
@@ -187,23 +186,28 @@ exports.book_update_get = (req, res) => {
       Genre.find().exec()
     ]).
     then((result) => {
-      res.render('book_update_get', {book: result[0], genres: result[1]});
+      //Find and mark genres from general list
+      for (let i = 0; i < result[1].length; i++) {
+        for (let book_genre of result[0].genre) {
+          if (result[1][i].name === book_genre.name) {
+            result[1][i].checked = true;
+          }
+        }
+      }
+      res.render('book_update', {book: result[0], genres: result[1]});
     }).
-    catch((err) => {console.log(err); next(err);});
+    catch((err) => {console.log(err); return next(err);});
   };
 
-  // exports.book_update_get = (req, res) => {
-  //     sanitizeParam(req.params.id);
-  //     Book.findById(req.params.id).
-  //     populate('genre').
-  //     populate('author').
-  //     exec((err, book_update) => {
-  //       if(err) {console.log('Database error!')};
-  //       res.render('book_update_get', {book: book_update});
-  //     });
-  //   };
+
 
 // Handle book update on POST.
-exports.book_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update POST');
-};
+exports.book_update_post = [
+
+  check('*').is
+  sanitizeBody('*').trim(),
+  function(req, res, next) {
+
+  },
+
+]
