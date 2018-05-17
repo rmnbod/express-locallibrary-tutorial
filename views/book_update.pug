@@ -10,12 +10,18 @@ block content
     br
     label(for='title') Title:
     input#title.form-control(type='text', name='title' value = book.title)
+    if error_obj
+      if error_obj.title
+        p.text-danger !{error_obj.title.msg}
     br
     label(for='summary') Summary:
     textarea#summary.form-control(rows='5' name='summary') !{book.summary}
     br
     label(for='isbn') ISBN:
     input#isbn.form-control(type='text', name='isbn', value = book.isbn)
+    if error_obj
+      if error_obj.isbn
+        p.text-danger !{error_obj.isbn.msg}
     br
     each genre in genres
       if genre.checked == true
@@ -28,8 +34,7 @@ block content
       | no genres
     br
     button.btn.btn-default#book_upd_submit(type="submit" method="post" disabled) Submit
-  
-    p !{error}
-    
+
+
   
   script(src='/javascripts/book_update.js')

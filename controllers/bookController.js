@@ -150,7 +150,12 @@ exports.book_create_post = [
                         results.genres[i].checked='true';
                     }
                 }
-                res.render('book_form', { title: 'Create Book',authors:results.authors, genres:results.genres, book: book, errors: errors.array() });
+                res.render('book_form', { title: 'Create Book',
+                  authors:results.authors,
+                  genres:results.genres,
+                  book: book,
+                  errors: errors.array()
+                });
             });
             return;
         }
@@ -195,7 +200,9 @@ exports.book_update_get = (req, res) => {
           }
         }
       }
-      res.render('book_update', {book: result[0], genres: result[1]});
+      res.render('book_update', {book: result[0],
+        genres: result[1],
+        error_obj: null});
     }).
     catch((err) => {console.log(err); return next(err);});
   };
@@ -222,10 +229,6 @@ exports.book_update_post = [
     (req, res, next) => {
       let errors = validationResult(req);
 
-      // console.log(util.format(errors.message) + "!!!!!!!!");
-      // console.log(util.inspect(errors.mapped(), {showHidden: false, depth: null}))
-
-
       if(!(req.body.genre instanceof Array)){
             if(typeof req.body.genre==='undefined')
             req.body.genre=[];
@@ -233,41 +236,46 @@ exports.book_update_post = [
             req.body.genre=new Array(req.body.genre);
           }
 
-      console.log(req.body.genre);
+          ///
+          Promise.all([
+            Book.findById(req.params.id)
+              .populate('genre').populate('author').exec(),
+              Genre.find().exec()
+          ])
+          .then(
 
+            (result) => {
 
-
-      if (!errors.isEmpty()) {
-
-        Promise.all([
-          Book.findById(req.params.id)
-            .populate('genre').populate('author').exec(),
-            Genre.find().exec()
-        ])
-        .then((result) => {
-
-          result[0].title = req.body.title;
-          result[0].summary = req.body.summary;
-          result[0].isbn = req.body.isbn;
-          result[0].genre = req.body.genre;
-
-          //console.log(result[0].genre + 'GENRES CHECKOUT');
-
-          //Find and mark genres from general list
-          for (let i = 0; i < result[1].length; i++) {
-            for (let book_genre of result[0].genre) {
-              if (result[1][i].name === book_genre.name) {
-                result[1][i].checked = true;
+            result[0].title = req.body.title;
+            result[0].summary = req.body.summary;
+            result[0].isbn = req.body.isbn;
+            result[0].genre = req.body.genre;
+            var book_save = result[0];
+            //Find and mark genres from general list
+            for (let i = 0; i < result[1].length; i++) {
+              for (let book_genre of result[0].genre) {
+                if (result[1][i].id == book_genre) {
+                  result[1][i].checked = true;
+                }
               }
             }
-          }
-          res.render('book_update', {book: result[0],
-                      genres: result[1], error: util.inspect(errors.mapped(), {showHidden: false, depth: null})});
-        }).
-        catch((err) => {console.log(err + 'ROMAN!!!'); return next(err);});
+              if (!errors.isEmpty()) {
+                  error_obj = errors.mapped();
+                  res.render('book_update', {book: result[0],
+                              genres: result[1], error: error_obj});
+                }
+                else {
+                  book_save.save((err) => {
+                    if(err) {
+                      console.log(err);
+                      return;
+                    }
+                    res.redirect(book_save.url);
+                  });
+                }
+            }).catch((err) => {console.log(err); return next(err);});
+
+
+
       }
-
-    }
-
-
 ]
