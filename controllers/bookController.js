@@ -2,6 +2,7 @@ var Book = require('../models/book');
 var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
+const util = require('util');
 const { check, body, validationResult } = require('express-validator/check');
 const { sanitizeBody, sanitizeParam } = require('express-validator/filter');
 
@@ -179,10 +180,10 @@ exports.book_delete_post = function(req, res) {
 exports.book_update_get = (req, res) => {
     sanitizeParam(req.params.id);
     Promise.all([
-      Book.findById(req.params.id).
-      populate('genre').
-      populate('author').
-      exec(),
+      Book.findById(req.params.id)
+      .populate('genre')
+      .populate('author')
+      .exec(),
       Genre.find().exec()
     ]).
     then((result) => {
@@ -204,10 +205,57 @@ exports.book_update_get = (req, res) => {
 // Handle book update on POST.
 exports.book_update_post = [
 
-  check('*').is
-  sanitizeBody('*').trim(),
-  function(req, res, next) {
+    //sanitizeBody('*').trim(),
 
-  },
+    check('title')
+    .isLength({min: 3, max: 100}).withMessage('Title can not be shorter than \
+    3 and longer than 100 characters'),
+
+    check('summary')
+    .isLength({min: undefined, max: 500})
+    .withMessage('Summary cannot be longer than 500 characters'),
+
+    check('isbn')
+    .isISBN()
+    .withMessage('Invalid ISBN'),
+
+    (req, res, next) => {
+      let errors = validationResult(req);
+
+      // console.log(util.format(errors.message) + "!!!!!!!!");
+      // console.log(util.inspect(errors.mapped(), {showHidden: false, depth: null}))
+
+      if (!errors.isEmpty()) {
+
+        Promise.all([
+          Book.findById(req.params.id)
+            .populate('genre').populate('author').exec(),
+            Genre.find().exec()
+        ])
+        .then((result) => {
+
+          result[0].title = req.body.title;
+          result[0].summary = req.body.summary;
+          result[0].isbn = req.body.isbn;
+          result[0].genre = req.body.genre;
+
+          //console.log(result[0].genre + 'GENRES CHECKOUT');
+
+          //Find and mark genres from general list
+          for (let i = 0; i < result[1].length; i++) {
+            for (let book_genre of result[0].genre) {
+              if (result[1][i].name === book_genre.name) {
+                result[1][i].checked = true;
+              }
+            }
+          }
+          res.render('book_update', {book: result[0],
+                      genres: result[1], error: util.inspect(errors.mapped(), {showHidden: false, depth: null})});
+        }).
+        catch((err) => {console.log(err + 'ROMAN!!!'); return next(err);});
+      }
+
+    }
+
 
 ]
