@@ -225,6 +225,18 @@ exports.book_update_post = [
       // console.log(util.format(errors.message) + "!!!!!!!!");
       // console.log(util.inspect(errors.mapped(), {showHidden: false, depth: null}))
 
+
+      if(!(req.body.genre instanceof Array)){
+            if(typeof req.body.genre==='undefined')
+            req.body.genre=[];
+            else
+            req.body.genre=new Array(req.body.genre);
+          }
+
+      console.log(req.body.genre);
+
+
+
       if (!errors.isEmpty()) {
 
         Promise.all([
